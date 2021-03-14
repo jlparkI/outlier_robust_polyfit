@@ -123,6 +123,6 @@ Compared to Scipy and Scikit-learn's robust linear regression algorithms, howeve
 
 ![equation 1](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/time_comp.png)
 
-The appropriate use-case then is for fitting a linear, quadratic or cubic where outliers may be present but are anticipated to represent a modest fraction of the data. You should be aware that this packge does not zero-center the data and you may want to do that for numerical stability if you are fitting a quadratic or cubic with large x-values.
+The use-case is for fitting a linear, quadratic or cubic where outliers may be present but are anticipated to represent a modest fraction of the data. You should be aware that this packge does not zero-center the data and you may want to do that for numerical stability if you are fitting a quadratic or cubic with large x-values.
 
 [1] Kevin P. Murphy. _Machine Learning: A Probabilistic Perspective._ Cambridge, MA: The MIT Press, 2012.
