@@ -1,0 +1,10 @@
+README.md
+setup.py
+RobustPolyfit.egg-info/PKG-INFO
+RobustPolyfit.egg-info/SOURCES.txt
+RobustPolyfit.egg-info/dependency_links.txt
+RobustPolyfit.egg-info/requires.txt
+RobustPolyfit.egg-info/top_level.txt
+src/RobustPolyfit/__init__.c
+testing/__init__.py
+testing/gen_test_datasets.py

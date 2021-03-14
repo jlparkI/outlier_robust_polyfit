@@ -15,9 +15,9 @@ datasets (>=100 datapoints). It yields a robust fit for datasets
 where 25% of datapoints are outliers (use with caution for datasets
 where the "outlier" population may be greater than 25%).
 
-![example](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_1.png)
+![example](https://raw.githubusercontent.com/jlparki/outlier_robust_polyfit/main/resources/example_1.png)
 
-![example](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_2.png)
+![example](https://raw.githubusercontent.com/jlparki/outlier_robust_polyfit/main/resources/example_2.png)
 
 ## Installation
 
@@ -25,9 +25,9 @@ where the "outlier" population may be greater than 25%).
 
 ## Usage
 
-    from RobustPolyfit import robust_polyfit**
+    from RobustPolyfit import robust_polyfit
     class robust_polyfit(int max_iter=500, float tol=1e-2,
-    int polyorder = 1, int df = 1)**
+    int polyorder = 1, int df = 1)
 
 - Parameters
     - max_iter: The maximum number of iterations
