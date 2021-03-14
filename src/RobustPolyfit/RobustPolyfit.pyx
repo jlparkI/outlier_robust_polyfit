@@ -1,15 +1,26 @@
 import numpy as np
 from scipy.linalg import solve_triangular
 import matplotlib.pyplot as plt
+cimport numpy as np
 
-class robust_polyfit():
+ctypedef np.float64_t FLOAT64
 
+cdef class robust_polyfit():
+    cdef public float var
+    cdef public bint converged
+    cdef public float tol
+    cdef public np.ndarray weights
+    cdef public int polyorder
+    cdef public int df
+    cdef public int max_iter
 
-    def __init__(self, max_iter=500, tol=1e-3, polyorder = 1, df = 4):
+    def __init__(self, int max_iter=500, float tol=1e-2, 
+            int polyorder = 1, int df = 1):
         self.check_user_specs(max_iter, tol, polyorder, df)
-        self.weights, self.var = None, 1.0
+        self.weights = np.empty((1,polyorder+1), dtype=np.float64)
+        self.var = 1.0
         self.polyorder = polyorder
-        self.df = 4
+        self.df = df
         self.max_iter = max_iter
         self.converged = False
         self.tol = tol
@@ -18,7 +29,7 @@ class robust_polyfit():
     #fit linear, quadratic or cubic right now but...high degree polynomials are
     #inherently ill-conditioned and we want to avoid promising the user a good
     #fit we may not be able to deliver; 3 seemed like a good cutoff.
-    def check_user_specs(self, max_iter, tol, polyorder, df):
+    cdef check_user_specs(self, max_iter, tol, polyorder, df):
         if max_iter < 1:
             raise ValueError("The number of iterations must be positive and > 1.")
         if tol < 0:
@@ -29,7 +40,7 @@ class robust_polyfit():
             raise ValueError("Currently this class only fits linear, quadratic or cubic"
                     "functions, i.e. only polyorder 1, 2 and 3 are currently accepted.")
 
-    def check_fitting_input(self, x, y, yvar):
+    cdef check_fitting_input(self, x, y, yvar):
         if isinstance(x, np.ndarray) == False or isinstance(y, np.ndarray) == False:
             raise ValueError("The input x and y data should be numpy arrays.")
         if x.dtype != "float64" or y.dtype != "float64":
@@ -57,39 +68,57 @@ class robust_polyfit():
 
     #Builds the vandermonde matrix, and sets columns to be unit norm if caller so
     #specifies (true during training, false during prediction). 
-    def get_vandermonde_mat(self, x, get_norms = False):
-        vmat = np.empty((x.shape[0], self.polyorder + 1))
+    cdef get_vandermonde_mat(self, np.ndarray[FLOAT64, ndim=1] x, 
+            bint get_norms = False):
+        cdef np.ndarray[FLOAT64, ndim=2] vmat = np.empty((x.shape[0], self.polyorder + 1),
+                            dtype=np.float64)
+        cdef np.ndarray[FLOAT64, ndim=1] norms = np.empty((self.polyorder+1),
+                dtype=np.float64)
         vmat[:,0] = 1.0
         vmat[:,1] = x
+        cdef int i = 0
         for i in range(1, self.polyorder):
             vmat[:,i+1] = x * vmat[:,i]
         if get_norms == False:
             return vmat
         norms = np.sqrt(np.square(vmat).sum(0))
-        norms[norms == 0] = 1.0
+        #idx = np.where(norms == 0)[0]
+        norms[norms==0] = 1.0
         return vmat / norms[np.newaxis,:], norms
 
 
-    def fit(self, x, y, special_linfit = False):
+    def fit(self, np.ndarray[FLOAT64, ndim=1] x, 
+            np.ndarray[FLOAT64, ndim=1] y):
         self.check_fitting_input(x,y, np.var(y))
         X_, norms = self.get_vandermonde_mat(x, get_norms=True)
         self.weights = self.get_starting_params(x, y)
         
+        cdef np.ndarray lower_bound = np.full((1), fill_value=-np.inf, dtype=np.float64)
+        cdef np.ndarray change = np.empty((1), dtype=np.float64)
+        cdef np.ndarray current_bound = np.empty((1), dtype=np.float64)
+        cdef np.ndarray resp = np.empty((y.shape[0]), dtype=np.float64)
+        cdef double weight_change = 0
+        cdef np.ndarray old_weights = np.full((1,self.polyorder+1),
+                fill_value = -np.inf, dtype=np.float64)
+        cdef np.ndarray preds = np.empty((y.shape[0]), dtype=np.float64)
+        
+        preds = self.internal_predict(X_)
+        #Crude estimate of the scale which is refined during fitting.
+        self.var = np.var(y)
+        
+        cdef int i = 0
         #Ordinarily in EM we iterate until the lower bound converges.
         #In THIS case, however, we can end up with very slow convergence
         #because the variance is being adjusted. To avoid this, we define 
         #convergence using both lower bound AND weights. If the weights 
         #are not changing and only lower bound is, we have converged.
-        lower_bound = -np.inf
-        old_weights = np.full(self.polyorder+1, fill_value=-np.inf)
-        preds = self.internal_predict(X_)
         for i in range(self.max_iter):
-            resp, current_bound = self.e_step(y, preds)
+            resp, current_bound[0] = self.e_step(y, preds)
             preds = self.m_step(X_, y, resp)
-            change = current_bound - lower_bound
+            change[0] = current_bound[0] - lower_bound[0]
             weight_change = np.max(np.abs((old_weights - self.weights) 
                                 / self.weights))
-            if np.abs(change) < self.tol or weight_change < 1e-2:
+            if np.abs(change[0]) < self.tol:
                 self.converged = True
                 self.weights = self.weights / norms
                 break
@@ -100,39 +129,61 @@ class robust_polyfit():
                     "increasing max_iter.")
 
 
-    def weighted_linreg(self, X, y, resp = None):
+    cdef weighted_linreg(self, np.ndarray[FLOAT64, ndim=2] X, 
+                np.ndarray[FLOAT64, ndim=1] y, 
+                np.ndarray[FLOAT64, ndim=1] resp):
+        cdef np.ndarray[FLOAT64, ndim=1] resp_sqrt = np.empty((resp.shape[0]),
+                    dtype = np.float64)
         resp_sqrt = np.sqrt(resp)
         q, r = np.linalg.qr(resp_sqrt[:,np.newaxis] * X)
         target = np.matmul(q.T, (resp_sqrt * y)[:,np.newaxis] )
         self.weights = solve_triangular(r, target).T
 
 
-    def internal_predict(self, X):
+    cdef internal_predict(self, np.ndarray[FLOAT64, ndim=2] X):
         return np.sum(X * self.weights, axis=1)
 
 
-    def e_step(self, y, preds):
+    cdef e_step(self, np.ndarray[FLOAT64, ndim=1] y, 
+                    np.ndarray[FLOAT64, ndim=1] preds):
+        cdef np.ndarray[FLOAT64, ndim=1] maha_dist = np.empty((y.shape[0]),
+                    dtype=np.float64)
+        cdef np.ndarray[FLOAT64, ndim=1] resp = np.empty((y.shape[0]), 
+                    dtype=np.float64)
+        cdef float current_bound
         maha_dist = self.get_maha_dist(y, preds)
         resp = (self.df + 1) / (self.df + maha_dist)
         current_bound = -np.log(self.var) - 0.5 * np.sum(resp * maha_dist)
         return resp, current_bound
 
-    def m_step(self, X, y, resp):
+    cdef m_step(self, np.ndarray[FLOAT64, ndim=2] X, 
+            np.ndarray[FLOAT64, ndim=1] y, 
+            np.ndarray[FLOAT64, ndim=1] resp):
+        cdef np.ndarray[FLOAT64, ndim=1] preds = np.empty((y.shape[0]),
+                        dtype=np.float64)
+        cdef float n = X.shape[0]
+        
         self.weighted_linreg(X, y, resp)
         preds = self.internal_predict(X)
-        self.var = (1 / X.shape[0]) * np.sum(resp * (y - preds)**2)
+        self.var = (1 / n) * np.sum(resp * (y - preds)**2)
         return preds
 
-    def get_maha_dist(self, y, preds):
+    cdef get_maha_dist(self, np.ndarray[FLOAT64, ndim=1] y, 
+            np.ndarray[FLOAT64, ndim=1] preds):
         return (y-preds)**2 / self.var
     
     
-    def get_starting_params(self, x, y):
+    cdef get_starting_params(self, np.ndarray[FLOAT64, ndim=1] x, 
+            np.ndarray[FLOAT64, ndim=1] y):
         return np.polyfit(x, y, deg=self.polyorder)[np.newaxis,:]
     
+    def get_coefs(self):
+        return self.weights.flatten()
 
     def predict(self, x):
         if self.converged == False:
             raise ValueError("Model not fitted yet!")
         X_ = self.get_vandermonde_mat(x)
         return np.sum(X_ * self.weights, axis=1)
+
+
