@@ -24,9 +24,9 @@ where the "outlier" population may be greater than 25%).
 
 ## Usage
 
-    **from RobustPolyfit import robust_polyfit
-    
-    class robust_polyfit(int max_iter=500, float tol=1e-2,
+> from RobustPolyfit import robust_polyfit
+>   
+> class robust_polyfit(int max_iter=500, float tol=1e-2,
         int polyorder = 1, int df = 1)**
 
 - max_iter
