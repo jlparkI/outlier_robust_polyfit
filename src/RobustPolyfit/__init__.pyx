@@ -81,7 +81,6 @@ cdef class robust_polyfit():
         if get_norms == False:
             return vmat
         norms = np.sqrt(np.square(vmat).sum(0))
-        #idx = np.where(norms == 0)[0]
         norms[norms==0] = 1.0
         return vmat / norms[np.newaxis,:], norms
 
@@ -107,7 +106,7 @@ cdef class robust_polyfit():
         
         cdef int i = 0
         #Ordinarily in EM we iterate until the lower bound converges.
-        #In THIS case, however, we can end up with very slow convergence
+        #In THIS case, however, we can occasionally have slow convergence
         #because the variance is being adjusted. To avoid this, we define 
         #convergence using both lower bound AND weights. If the weights 
         #are not changing and only lower bound is, we have converged.
@@ -115,9 +114,8 @@ cdef class robust_polyfit():
             resp, current_bound[0] = self.e_step(y, preds)
             preds = self.m_step(X_, y, resp)
             change[0] = current_bound[0] - lower_bound[0]
-            weight_change = np.max(np.abs((old_weights - self.weights) 
-                                / self.weights))
-            if np.abs(change[0]) < self.tol:
+            weight_change = np.max(np.abs(old_weights / self.weights) - 1 )
+            if np.abs(change[0]) < self.tol or weight_change < 1e-3:
                 self.converged = True
                 self.weights = self.weights / norms
                 break
