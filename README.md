@@ -1,8 +1,8 @@
 # outlier_robust_polyfit
 
-- [Summary](##Summary)
-- [Installation](##Installation)
-- [Usage](##Usage)
+- [Summary](#summary)
+- [Installation](#installation)
+- [Usage](#usage)
 
 ## Summary
 
