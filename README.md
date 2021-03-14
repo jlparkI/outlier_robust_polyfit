@@ -24,10 +24,10 @@ where the "outlier" population may be greater than 25%).
 
 ## Usage
 
-    from RobustPolyfit import robust_polyfit
+    **from RobustPolyfit import robust_polyfit
     
     class robust_polyfit(int max_iter=500, float tol=1e-2,
-        int polyorder = 1, int df = 1)
+        int polyorder = 1, int df = 1)**
 
 - max_iter
     - The maximum number of iterations
@@ -51,11 +51,11 @@ to standard least squares fitting.
 Both x and y must be numpy np.float64 one-dimensional arrays. If there are
 any problems or the fit does not converge, a ValueError will result.
 
-   predict(x)
+   **predict(x)**
 
     - Generates predictions for the x numpy array supplied.
 
-   get_coefs()
+   **get_coefs()**
 
     - Gets the coefficients from the fit. They are returned as a numpy array
 ordered from lowest to highest degree terms (intercept, first degree term,
