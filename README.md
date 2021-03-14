@@ -29,6 +29,7 @@ where the "outlier" population may be greater than 25%).
     class robust_polyfit(int max_iter=500, float tol=1e-2,
     int polyorder = 1, int df = 1)**
 
+> Parameters
     - max_iter: The maximum number of iterations
     - tol: Tolerance for convergence (change in lower bound).
 Setting this to a higher value reduces the number of iterations, leading
@@ -116,13 +117,12 @@ While the EM algorithm has good convergence guarantees, this is obviously much s
 least squares, because for least squares you perform a QR decomposition once, whereas here
 you do so on each iteration. _Usually_ the model converges in five iterations or less, but
 there are cases where this is not true, and even then you can anticipate this will be 3-5
-times slower than least squares for an equivalent number of datapoints. Also, the EM algorithm is sensitive to choice of starting point. Here we are selecting a starting point by using a simple least squares fit. This works well for typical use cases but may break down if a large fraction of the data lies well outside the expected region. Suggested use is in cases
-where 25% or less of datapoints are expected to be outliers.
+times slower than least squares for an equivalent number of datapoints. Also, the EM algorithm is sensitive to choice of starting point. Here we are selecting a starting point by using a simple least squares fit. This works well for typical use cases but may break down if a large fraction of the data lies well outside the expected region.
 
 Compared to Scipy and Scikit-learn's robust linear regression algorithms, however, this one is much faster for any reasonable number of datapoints (partly thanks to some Cython-based optimization, and partly thanks to the choice of algorithm). For 25 datapoints, RobustPolyfit is 2x faster than Scipy's siegelslopes, and siegelslopes exhibits O(N^2) scaling:
 
 ![equation 1](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/time_comp.png)
 
-The appropriate use-case then is for fitting a linear, quadratic or cubic where outliers may be present but are anticipated to represent 25% or less of the datapoints, and where siegelslopes or theil-sen regression is too slow (which in my experience is true any time you want to fit a large number of datasets). You should be aware that this packge does not zero-center the data and you may want to do that for numerical stability if you are fitting a quadratic or cubic with large x-values.
+The appropriate use-case then is for fitting a linear, quadratic or cubic where outliers may be present but are anticipated to represent a modest fraction of the data. You should be aware that this packge does not zero-center the data and you may want to do that for numerical stability if you are fitting a quadratic or cubic with large x-values.
 
 [1] Kevin P. Murphy. _Machine Learning: A Probabilistic Perspective._ Cambridge, MA: The MIT Press, 2012.
