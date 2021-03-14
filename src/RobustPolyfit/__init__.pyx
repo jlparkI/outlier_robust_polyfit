@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.linalg import solve_triangular
-import matplotlib.pyplot as plt
 cimport numpy as np
 
 ctypedef np.float64_t FLOAT64

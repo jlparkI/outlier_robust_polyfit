@@ -1,6 +1,6 @@
 import numpy as np, argparse, sys
 sys.path.append("..")
-from src.RobustPolyfit.RobustPolyfit import robust_polyfit
+from src.RobustPolyfit import robust_polyfit
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 import time
