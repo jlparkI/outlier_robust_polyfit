@@ -8,9 +8,9 @@ datasets (>=100 datapoints). It yields a robust fit for datasets
 where 25% of datapoints are outliers (use with caution for datasets
 > 25%).
 
-![example] (https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_1.png)
+![example](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_1.png)
 
-![example] (https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_2.png)
+![example](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_2.png)
 
 
 - [Installation](##Installation)
