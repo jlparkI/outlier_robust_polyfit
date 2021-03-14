@@ -29,7 +29,7 @@ where the "outlier" population may be greater than 25%).
     class robust_polyfit(int max_iter=500, float tol=1e-2,
     int polyorder = 1, int df = 1)**
 
-> Parameters
+- Parameters
     - max_iter: The maximum number of iterations
     - tol: Tolerance for convergence (change in lower bound).
 Setting this to a higher value reduces the number of iterations, leading
