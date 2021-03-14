@@ -29,22 +29,23 @@ where the "outlier" population may be greater than 25%).
     class robust_polyfit(int max_iter=500, float tol=1e-2,
         int polyorder = 1, int df = 1)
 
-- **max_iter**
+- max_iter
     - The maximum number of iterations
-- **tol**
+- tol
     - Tolerance for convergence (change in lower bound).
     - Setting this to a higher value reduces the number of iterations, leading
 to faster convergence (and in some cases a poorer fit).
-- **polyorder**
+- polyorder
     - The degree of the polynomial. Allowed values are 1, 2 and 3.
-- **df**
+- df
     - The degrees of freedom of the Student's t-distribution.
     - A smaller value leads to a higher level of tolerance for outliers. df=1
 is the smallest allowed value. Large values for df, e.g. >> 5, are essentially
 equivalent to normally distributed error and do not offer any benefit compared
 to standard least squares fitting.
 
-    fit(x, y)
+
+    **fit(x, y)**
 
     - Fits the model using the x and y data supplied.
 Both x and y must be numpy np.float64 one-dimensional arrays. If there are
