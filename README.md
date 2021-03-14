@@ -100,14 +100,14 @@ second degree term etc).
     plt.ylabel("y")
     plt.show()
     
-![example](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/example_code.png)
+![example](https://raw.githubusercontent.com/jlparki/outlier_robust_polyfit/main/resources/example_code.png)
 
 
 ## Algorithm
 
 Least squares assumes errors are normally distributed and thus misbehaves badly in the presence of outliers. If there are outliers, a more appropriate assumption is the heavy-tailed Student's t-distribution. Linear models with Student's t-distributed errors do not fit in closed form, so this package fits using the expectation-maximization or EM algorithm. We can do so because an equivalent form for a Student t-distribution is a Gaussian scale mixture:
 
-![equation 1](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/eq1.png)
+![equation 1](https://raw.githubusercontent.com/jlparki/outlier_robust_polyfit/main/resources/eq1.png)
 
 Then zi is the hidden variable, and we can use the usual EM approach (see [1] among many others for details). On the E-step, we update the zi values, and on the M step we update the mean using weighted linear regression with the zis as weights and update the variance. Because the zi values in the E-step are
 determined using the Mahalanobis distance from the mean of the distribution, outliers are
@@ -121,7 +121,7 @@ times slower than least squares for an equivalent number of datapoints. Also, th
 
 Compared to Scipy and Scikit-learn's robust linear regression algorithms, however, this one is much faster for any reasonable number of datapoints (partly thanks to some Cython-based optimization, and partly thanks to the choice of algorithm). For 25 datapoints, RobustPolyfit is 2x faster than Scipy's siegelslopes, and siegelslopes exhibits O(N^2) scaling:
 
-![equation 1](https://github.com/jlparki/outlier_robust_polyfit/blob/main/resources/time_comp.png)
+![equation 1](https://raw.githubusercontent.com/jlparki/outlier_robust_polyfit/main/resources/time_comp.png)
 
 The use-case is for fitting a linear, quadratic or cubic where outliers may be present but are anticipated to represent a modest fraction of the data. You should be aware that this packge does not zero-center the data and you may want to do that for numerical stability if you are fitting a quadratic or cubic with large x-values.
 
