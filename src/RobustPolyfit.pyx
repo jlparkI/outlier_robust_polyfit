@@ -12,9 +12,10 @@ cdef class robust_polyfit():
     cdef public int polyorder
     cdef public int df
     cdef public int max_iter
+    cdef private bint user_spec_start_weights
 
     def __init__(self, int max_iter=500, float tol=1e-2, 
-            int polyorder = 1, int df = 1):
+            int polyorder = 1, int df = 1, starting_weights=None):
         self.check_user_specs(max_iter, tol, polyorder, df)
         self.weights = np.empty((1,polyorder+1), dtype=np.float64)
         self.var = 1.0
@@ -23,6 +24,18 @@ cdef class robust_polyfit():
         self.max_iter = max_iter
         self.converged = False
         self.tol = tol
+        if starting_weights is not None:
+            if isinstance(starting_weights, np.ndarray) == False:
+                raise ValueError("Starting weights, if supplied, must be a numpy array.")
+            if starting_weights.shape[0] != 1 or starting_weights.shape[1] != polyorder + 1:
+                raise ValueError("Starting weights, if supplied, must be of shape "
+                        "(1,polyorder+1)")
+            if starting_weights.dtype != "float64":
+                raise ValueError("Starting weights, if supplied, must be of dtype float64")
+            self.user_spec_start_weights = True
+            self.weights = starting_weights
+        else:
+            self.user_spec_start_weights = False
         
     #Check the conditions the user selected. It's sort of arbitrary that we only
     #fit linear, quadratic or cubic right now but...high degree polynomials are
@@ -89,8 +102,9 @@ cdef class robust_polyfit():
             np.ndarray[FLOAT64, ndim=1] y):
         self.check_fitting_input(x,y, np.var(y))
         X_, norms = self.get_vandermonde_mat(x, get_norms=True)
-        self.weights = self.get_starting_params(x, y)
-        
+        if self.user_spec_start_weights == False:
+            self.weights = self.get_starting_params(x, y)
+
         cdef np.ndarray lower_bound = np.full((1), fill_value=-np.inf, dtype=np.float64)
         cdef np.ndarray change = np.empty((1), dtype=np.float64)
         cdef np.ndarray current_bound = np.empty((1), dtype=np.float64)
