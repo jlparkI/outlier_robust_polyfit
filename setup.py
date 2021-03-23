@@ -7,7 +7,7 @@ with open("README.md", "r") as fhandle:
 
 setup(
         name="RobustPolyfit",
-        version="0.0.6",
+        version="0.0.7",
         packages=find_packages(),
         author="Jonathan Parkinson",
         description="Outlier-robust regression for polynomials 1 <= degree <= 3",

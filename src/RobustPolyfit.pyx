@@ -12,7 +12,7 @@ cdef class robust_polyfit():
     cdef public int polyorder
     cdef public int df
     cdef public int max_iter
-    cdef private bint user_spec_start_weights
+    cdef public bint user_spec_start_weights
 
     def __init__(self, int max_iter=500, float tol=1e-2, 
             int polyorder = 1, int df = 1, starting_weights=None):
