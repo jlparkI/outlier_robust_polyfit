@@ -4,6 +4,30 @@ cimport numpy as np
 
 ctypedef np.float64_t FLOAT64
 
+
+#This class fits a robust polynomial of degree 1, 2 or 3 to one-dimensional
+#data using the EM algorithm and Student's t-distributed errors. As in any
+#case where EM is used, the quality of the solution may depend on the choice of
+#starting point, because EM finds the closest local maximum. A simple default 
+#can be used, or the user can supply a starting point specific for 
+#a particular problem.
+#INPUTS
+#max_iter       --  an integer specifying the maximum number of iterations allowed
+#                   for convergence.
+#tol            --  If the change in the lower bound falls below this value, the
+#                   algorithm has converged.
+#polyorder      --  Integer in [1,2,3] -- the degree of the polynomial.
+#df             --  The degrees of freedom for the Student's t-distribution that
+#                   models the residuals; must be >= 1. A small value indicates a
+#                   heavy-tailed distribution with a high probability of outliers.
+#                   A large value results in a fit no different from that supplied by
+#                   OLS. Values in the range 1 - 4 are generally best for datasets
+#                   where outliers are expected.
+#starting_weights   --  User-specified starting weights -- these are checked to
+#                       make sure the dimensionality is correct.
+
+#Note this class is cdef which makes it more lightweight but does mean it will have no
+#__dict__.
 cdef class robust_polyfit():
     cdef public float var
     cdef public bint converged

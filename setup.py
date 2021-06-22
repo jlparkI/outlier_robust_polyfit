@@ -1,5 +1,4 @@
-from setuptools import find_packages, setup
-from Cython.Build import cythonize
+from setuptools import Extension, setup
 import numpy as np
 
 with open("README.md", "r") as fhandle:
@@ -7,14 +6,13 @@ with open("README.md", "r") as fhandle:
 
 setup(
         name="RobustPolyfit",
-        version="0.0.7",
-        packages=find_packages(),
+        version="0.0.8",
         author="Jonathan Parkinson",
         description="Outlier-robust regression for polynomials 1 <= degree <= 3",
         long_description=long_description,
         long_description_content_type="text/markdown",
         url="https://github.com/jlparki/outlier_robust_polyfit",
-        ext_modules=cythonize(["src/RobustPolyfit.pyx"]),
+        ext_modules=[Extension("RobustPolyfit", ["src/RobustPolyfit.c"])],
         include_dirs=[np.get_include()],
         install_requires=["numpy", "scipy", "cython"]
 )
