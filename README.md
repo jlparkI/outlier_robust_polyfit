@@ -27,7 +27,7 @@ where the "outlier" population may be greater than 25%).
 
     from RobustPolyfit import robust_polyfit
     class robust_polyfit(int max_iter=500, float tol=1e-2,
-    int polyorder = 1, int df = 1)
+    int polyorder = 1, int df = 1, starting_weights = None)
 
 - Parameters
     - max_iter: The maximum number of iterations
@@ -40,6 +40,13 @@ smaller value leads to a higher level of tolerance for outliers. df=1
 is the smallest allowed value. Large values for df, e.g. >> 5, are essentially
 equivalent to normally distributed error and do not offer any benefit compared
 to standard least squares fitting.
+    - starting_weights: Starting values for the polynomial coefficients. If None,
+the model will use a simple least-squares fit to obtain starting values and then
+iteratively improve these. If starting values are supplied, they must be a numpy array
+of shape (K + 1,), where K is the order of the polynomial. The coefficients in this array
+should be in the order (intercept, first degree term, second degree term etc.) 
+Supplying good starting values
+may in some cases be helpful since the model is fit using EM which finds a local maximum.
 
 
     fit(x, y)
@@ -117,7 +124,11 @@ While the EM algorithm has good convergence guarantees, this is obviously much s
 least squares, because for least squares you perform a QR decomposition once, whereas here
 you do so on each iteration. _Usually_ the model converges in five iterations or less, but
 there are cases where this is not true, and even then you can anticipate this will be 3-5
-times slower than least squares for an equivalent number of datapoints. Also, the EM algorithm is sensitive to choice of starting point. Here we are selecting a starting point by using a simple least squares fit. This works well for typical use cases but may break down if a large fraction of the data lies well outside the expected region.
+times slower than least squares for an equivalent number of datapoints. Also, the EM algorithm is sensitive to choice of starting point. 
+Here we are selecting a starting point by using a simple least squares fit. 
+This works well for typical use cases but may break down if a large fraction of the data lies well outside the expected region.
+Supplying starting values may sometimes be beneficial if approximate values for the coefficients
+are available.
 
 Compared to Scipy and Scikit-learn's robust linear regression algorithms, however, this one is much faster for any reasonable number of datapoints (partly thanks to some Cython-based optimization, and partly thanks to the choice of algorithm). For 25 datapoints, RobustPolyfit is 2x faster than Scipy's siegelslopes, and siegelslopes exhibits O(N^2) scaling:
 
